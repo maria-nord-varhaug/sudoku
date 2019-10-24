@@ -1,6 +1,7 @@
 import copy
 import itertools
-from threading import Thread
+from itertools import chain
+import operator
 
 
 class CSP:
@@ -95,19 +96,25 @@ class CSP:
                     return False
             return True
 
+# Does not work yet but i need to commit to work on my other computer rip
+    def orderDomainValues(self, variable, assignment):
+        numlist = list(chain(*assignment.values())) # just testing out som spicy syntax lol, but this basically creates a big list of all the values in the domains
+        sortreadylist = list(map(lambda value: (value, numlist.count(value), assignment[variable]))) # creates a list with tuples containing a value in the variables domain and how many there are of that exact value altogether in all the domains
+        return map(lambda x: x[0], sortreadylist.sort(key=operator.itemgetter(1), reverse = True))
+
     def backtrack(self, assignment):    #  Recursively tries domain values until it finds the ones that works
 
         if self.assignmentIsComplete(assignment):   # If we have found a solution for all domains
             return assignment
 
 
-        unassignedVar = self.select_unassigned_variable(assignment) # chooses some unassigned variable
+        unassignedVar = self.select_unassigned_variable(assignment) # chooses some unassigned variable # TODO: maybe order domain values before checking them out? 
 
         for value in assignment[unassignedVar]:                     # goes through each value in its domain, and we want to see if it can solve our problem
             self.backtrack_count += 1                               # just to see how many times we call backtrack
             newAssignment = copy.deepcopy(assignment)               # new domain state (we make a new deep copy for each value so that the recursive calls don't influence each other when one fails)
             newAssignment[unassignedVar] = [value]
-            if self.inference(newAssignment, self.get_all_arcs()):  # TODO: get_all_arcs(newAssignment)? mulig vi ikke trenger å gå gjennom alle hele tiden...
+            if self.inference(newAssignment, self.get_all_arcs()):  
                 result = self.backtrack(newAssignment)
                 if result:
                     return result                                   # Eventually we will reach a value assignment s.t. all variables have a value, and return this. this is our solution
@@ -116,6 +123,7 @@ class CSP:
 
 
     def inference(self, assignment, queue):     # returns false if revise removed all domain values from a variable, because the path we're currently on will then be wrong
+        # We basically check if we can and then eliminate domain values for all squares in the sudoku boaard based on the arc consistencies alone (the basic sudoku rules)
 
         while queue:	                        # as long as there still are elements to go through
             x, y = queue.pop(0)                 # Destructure elements in queue as elements x and y (basically, x='i1-j1', y='i2-j2')
@@ -226,4 +234,3 @@ run(0)
 run(1)
 run(2)
 run(3)
-run(4)
