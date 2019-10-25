@@ -1,7 +1,7 @@
 import copy
-import itertools
 from itertools import chain
 import operator
+import time
 
 
 class CSP:
@@ -129,7 +129,6 @@ class CSP:
             x, y = queue.pop(0)                 # Destructure elements in queue as elements x and y (basically, x='i1-j1', y='i2-j2')
             if self.revise(assignment, x, y):   # If we have revised something (removed possible values from the domains of the variables)
                 if not assignment[x]:           # and possible values for x is now 0, we've done something wrong, and we need to backtrack
-                    self.backtrack_fails += 1
                     return False
                 for neighbour in self.get_all_neighboring_arcs(x):  # else we add every neighbour of x to the queue unless it is y
                     if neighbour[0] != y:
@@ -223,14 +222,19 @@ def isLegal(board):
 filenames = ["easy.txt", "medium.txt", "hard.txt", "veryhard.txt", "extremelyhard.txt"]
 
 def run(fileno):
-    print(" ____SOLUTION OF %s ____" % filenames[fileno] )
+    print(" ____SOLUTION OF %s ____" % filenames[fileno])
     csp = create_sudoku_csp(filenames[fileno])
+    starttime = time.time()
     solution = csp.backtracking_search()
+    endtime = time.time()
     print_sudoku_solution(solution)
     print("backtrack calls: ", csp.backtrack_count)
     print("backtrack fails: ", csp.backtrack_fails)
+    print("time: %s" % (endtime - starttime))
+
 
 run(0)
 run(1)
 run(2)
 run(3)
+
