@@ -1,6 +1,4 @@
 import copy
-from itertools import chain
-import operator
 import time
 
 
@@ -82,31 +80,26 @@ class CSP:
         self.backtrack_count += 1
         return self.backtrack(assignment)
 
+    ## Apparently, the test boards are in such a way that it requires less recursive calls if you start at the last variable in the dict, but that shouldn't be the case in general
     def select_unassigned_variable(self, assignment):       # We want to choose the variable with the least possible domain options (more than 1 though)
         least = 10
         for variable, variabledomain in assignment.items():
             l = len(variabledomain)
-            if l < least and l > 1:     # We just find the variable with the shortest domain list larger than one
+            if l > 1 and l < least:
+                least = l     # I
                 unassigned = variable
         return unassigned
 
-    def assignmentIsComplete(self, assignment): # TODO: effektiviser
+    def assignmentIsComplete(self, assignment): 
             for value in assignment.values():
                 if len(value) > 1:
                     return False
             return True
 
-# Does not work yet but i need to commit to work on my other computer rip
-    def orderDomainValues(self, variable, assignment):
-        numlist = list(chain(*assignment.values())) # just testing out som spicy syntax lol, but this basically creates a big list of all the values in the domains
-        sortreadylist = list(map(lambda value: (value, numlist.count(value), assignment[variable]))) # creates a list with tuples containing a value in the variables domain and how many there are of that exact value altogether in all the domains
-        return map(lambda x: x[0], sortreadylist.sort(key=operator.itemgetter(1), reverse = True))
-
     def backtrack(self, assignment):    #  Recursively tries domain values until it finds the ones that works
 
         if self.assignmentIsComplete(assignment):   # If we have found a solution for all domains
             return assignment
-
 
         unassignedVar = self.select_unassigned_variable(assignment) # chooses some unassigned variable # TODO: maybe order domain values before checking them out? 
 
